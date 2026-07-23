@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BananaBread Arena</title>
+    <link
+      rel="stylesheet"
+      href="/ext-assets/bananabreadwasm/app.css?v=arena-2"
+    />
+  </head>
+  <body class="arena-body">
+    <main class="arena-shell">
+      <header class="arena-header">
+        <div class="arena-logo" aria-hidden="true">BB</div>
+        <div>
+          <p class="arena-kicker">LIGHTNING DEATHMATCH</p>
+          <h1 id="arena-name">BananaBread Arena</h1>
+          <p id="arena-summary" class="muted">Loading paid arena…</p>
+        </div>
+      </header>
+
+      <div id="arena-error" class="arena-alert arena-alert-error" hidden></div>
+
+      <section class="arena-grid">
+        <div class="arena-card arena-entry">
+          <div id="join-panel">
+            <p class="arena-eyebrow">PAID ADMISSION</p>
+            <h2>Enter the arena</h2>
+            <p>
+              Pay once to spawn. If another paid player kills you, your stake
+              funds their reward. Pay again to respawn.
+            </p>
+            <form id="join-form" class="arena-form">
+              <label>
+                Player name
+                <input
+                  id="player-name"
+                  name="name"
+                  maxlength="18"
+                  autocomplete="nickname"
+                  placeholder="PLAYER"
+                  required
+                />
+              </label>
+              <label>
+                Lightning address for rewards and refunds
+                <input
+                  id="ln-address"
+                  name="lnAddress"
+                  maxlength="320"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                  required
+                />
+              </label>
+              <button id="join-button" type="submit">
+                CREATE JOIN INVOICE
+              </button>
+            </form>
+          </div>
+
+          <div id="invoice-panel" hidden>
+            <p class="arena-eyebrow">WAITING FOR PAYMENT</p>
+            <h2>Pay the entry invoice</h2>
+            <img
+              id="invoice-qr"
+              class="invoice-qr"
+              alt="Lightning invoice QR"
+            />
+            <button id="copy-invoice" class="secondary-button" type="button">
+              COPY INVOICE
+            </button>
+            <p id="payment-status" class="muted">
+              The game unlocks only after the invoice settles.
+            </p>
+          </div>
+
+          <div id="admitted-panel" hidden>
+            <p class="arena-eyebrow">ADMISSION CONFIRMED</p>
+            <h2>You are cleared to fight</h2>
+            <p id="admitted-copy"></p>
+            <a
+              id="enter-arena"
+              class="arena-button"
+              href="#"
+              target="_top"
+              rel="noreferrer"
+            >
+              ENTER AUTHORITATIVE ARENA
+            </a>
+            <p class="muted small-copy">
+              The game opens on the Sour gateway. Your private ticket is checked
+              there before a server slot is created.
+            </p>
+          </div>
+
+          <div id="settled-panel" hidden>
+            <p id="settled-eyebrow" class="arena-eyebrow">ROUND OVER</p>
+            <h2 id="settled-title">You were eliminated</h2>
+            <p id="settled-copy"></p>
+            <button id="play-again" type="button">PAY TO RESPAWN</button>
+          </div>
+        </div>
+
+        <aside class="arena-card arena-roster">
+          <div class="arena-roster-heading">
+            <div>
+              <p class="arena-eyebrow">PUBLIC ROOM</p>
+              <h2>Paid players</h2>
+            </div>
+            <span id="player-count" class="arena-count">0 / 5</span>
+          </div>
+          <ol id="player-list" class="player-list"></ol>
+          <div class="arena-rules">
+            <h3>Rules</h3>
+            <ul>
+              <li>No bots in paid rooms.</li>
+              <li>Rewards activate with two paid live players.</li>
+              <li>The Sour server—not a browser—confirms every kill.</li>
+              <li>A 60-second disconnect expires the slot and refunds it.</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      <footer>Experimental private beta. Entry is capped at 100 sats.</footer>
+    </main>
+
+    <script src="/ext-assets/bananabreadwasm/lnbits-extension-sdk.js?v=arena-2"></script>
+    <script src="/ext-assets/bananabreadwasm/qr.js?v=arena-2"></script>
+    <script src="/ext-assets/bananabreadwasm/public.js?v=arena-2"></script>
+  </body>
+</html>

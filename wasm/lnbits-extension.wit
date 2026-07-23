@@ -1,0 +1,343 @@
+package lnbits:extension;
+
+interface host {
+  record storage-get-request {
+    table: string,
+    id: string
+  }
+
+  record storage-get-response {
+    data-json: option<string>
+  }
+
+  record storage-set-request {
+    table: string,
+    data-json: string
+  }
+
+  record storage-set-response {
+    ok: bool
+  }
+
+  record storage-append-public-request {
+    table: string,
+    source-id: string,
+    data-json: string
+  }
+
+  record storage-append-public-response {
+    id: string
+  }
+
+  record storage-paginated-request {
+    table: string,
+    filters-json: string,
+    search: string,
+    search-fields: list<string>,
+    sort-by: string,
+    descending: bool,
+    limit: u32,
+    offset: u32
+  }
+
+  record storage-public-paginated-request {
+    table: string,
+    source-id: string,
+    filters-json: string,
+    search: string,
+    search-fields: list<string>,
+    sort-by: string,
+    descending: bool,
+    limit: u32,
+    offset: u32
+  }
+
+  record storage-paginated-response {
+    rows-json: string,
+    total: u64
+  }
+
+  record storage-delete-request {
+    table: string,
+    id: string
+  }
+
+  record storage-delete-response {
+    ok: bool
+  }
+
+  record invoice-request {
+    wallet-id: string,
+    amount: f64,
+    currency: string,
+    memo: string,
+    tag: string,
+    extra: list<tuple<string, string>>
+  }
+
+  record invoice-public-request {
+    source-id: string,
+    amount: f64,
+    currency: string,
+    memo: string,
+    extra: list<tuple<string, string>>
+  }
+
+  record invoice-response {
+    payment-hash: string,
+    payment-request: string,
+    checking-id: string
+  }
+
+  record pay-invoice-request {
+    wallet-id: string,
+    payment-request: string,
+    max-sat: option<u64>,
+    description: string,
+    extra: list<tuple<string, string>>
+  }
+
+  record pay-lnurl-request {
+    wallet-id: string,
+    lnurl: string,
+    amount: f64,
+    currency: string,
+    comment: option<string>,
+    description: string,
+    max-sat: option<u64>,
+    extra: list<tuple<string, string>>
+  }
+
+  record pay-invoice-response {
+    ok: bool,
+    error: option<string>,
+    checking-id: option<string>,
+    payment-hash: option<string>,
+    status: option<string>,
+    amount-msat: s64,
+    fee-msat: s64,
+    pending: bool,
+    success: bool
+  }
+
+  record websocket-publish-request {
+    item-id: string,
+    data-json: string
+  }
+
+  record websocket-publish-response {
+    sent: bool
+  }
+
+  record user-wallet-summary {
+    id: string,
+    name: string,
+    currency: option<string>
+  }
+
+  record list-user-wallets-response {
+    wallets: list<user-wallet-summary>
+  }
+
+  record http-request-options {
+    method: string,
+    url: string,
+    headers: list<tuple<string, string>>,
+    body: option<string>
+  }
+
+  record http-response-data {
+    status-code: u16,
+    headers: list<tuple<string, string>>,
+    body: string
+  }
+
+  record extension-api-request-options {
+    extension-id: string,
+    method: string,
+    path: string,
+    body: option<string>
+  }
+
+  record random-id-request {
+    prefix: string
+  }
+
+  record random-id-response {
+    id: string
+  }
+
+  record now-response {
+    timestamp: u64
+  }
+
+  record log-request {
+    level: string,
+    message: string
+  }
+
+  record log-response {
+    ok: bool
+  }
+
+  storage-get: func(request: storage-get-request) -> storage-get-response;
+  storage-get-public: func(request: storage-get-request) -> storage-get-response;
+  storage-set: func(request: storage-set-request) -> storage-set-response;
+  storage-append-public: func(request: storage-append-public-request) -> storage-append-public-response;
+  storage-get-paginated: func(request: storage-paginated-request) -> storage-paginated-response;
+  storage-get-public-paginated: func(request: storage-public-paginated-request) -> storage-paginated-response;
+  storage-delete: func(request: storage-delete-request) -> storage-delete-response;
+  create-invoice: func(request: invoice-request) -> invoice-response;
+  create-invoice-public: func(request: invoice-public-request) -> invoice-response;
+  pay-invoice: func(request: pay-invoice-request) -> pay-invoice-response;
+  pay-lnurl: func(request: pay-lnurl-request) -> pay-invoice-response;
+  list-user-wallets: func() -> list-user-wallets-response;
+  websocket-publish: func(request: websocket-publish-request) -> websocket-publish-response;
+  http-request: func(request: http-request-options) -> http-response-data;
+  extension-api-request: func(request: extension-api-request-options) -> http-response-data;
+  random-id: func(request: random-id-request) -> random-id-response;
+  now: func() -> now-response;
+  log: func(request: log-request) -> log-response;
+}
+
+interface utils-currencies {
+  record currency-list-response {
+    currencies: list<string>
+  }
+
+  record currency-rate-request {
+    currency: string
+  }
+
+  record currency-rate-response {
+    rate: f64,
+    price: f64
+  }
+
+  record currency-convert-request {
+    amount: f64,
+    from-currency: string,
+    to: string
+  }
+
+  record currency-convert-response {
+    amounts: list<tuple<string, f64>>
+  }
+
+  record fiat-to-sats-request {
+    amount: f64,
+    currency: string
+  }
+
+  record fiat-to-sats-response {
+    amount-sat: u64
+  }
+
+  record sats-to-fiat-request {
+    amount: f64,
+    currency: string
+  }
+
+  record sats-to-fiat-response {
+    amount: f64
+  }
+
+  list-currencies: func() -> currency-list-response;
+  rate: func(request: currency-rate-request) -> currency-rate-response;
+  convert: func(request: currency-convert-request) -> currency-convert-response;
+  fiat-to-sats: func(request: fiat-to-sats-request) -> fiat-to-sats-response;
+  sats-to-fiat: func(request: sats-to-fiat-request) -> sats-to-fiat-response;
+}
+
+interface utils-server {
+  record server-health-response {
+    server-time: u64,
+    up-time: string
+  }
+
+  health: func() -> server-health-response;
+}
+
+interface utils-lightning {
+  record bolt11-request {
+    bolt11: string
+  }
+
+  record decode-invoice-response {
+    valid: bool,
+    payment-hash: option<string>,
+    amount-msat: option<u64>,
+    expiry: option<u64>,
+    expires-at: option<u64>,
+    memo: option<string>
+  }
+
+  record validate-invoice-response {
+    valid: bool,
+    error: option<string>
+  }
+
+  record invoice-payment-hash-response {
+    payment-hash: string
+  }
+
+  record invoice-amount-msat-response {
+    amount-msat: option<u64>
+  }
+
+  record invoice-expiry-response {
+    expires-at: option<u64>
+  }
+
+  record invoice-memo-response {
+    memo: option<string>
+  }
+
+  record verify-preimage-request {
+    preimage: string,
+    payment-hash: string
+  }
+
+  record verify-preimage-response {
+    valid: bool
+  }
+
+  record random-secret-and-hash-request {
+    length: u32
+  }
+
+  record random-secret-and-hash-response {
+    secret: string,
+    hash: string
+  }
+
+  decode-invoice: func(request: bolt11-request) -> decode-invoice-response;
+  validate-invoice: func(request: bolt11-request) -> validate-invoice-response;
+  invoice-payment-hash: func(request: bolt11-request) -> invoice-payment-hash-response;
+  invoice-amount-msat: func(request: bolt11-request) -> invoice-amount-msat-response;
+  invoice-expiry: func(request: bolt11-request) -> invoice-expiry-response;
+  invoice-memo: func(request: bolt11-request) -> invoice-memo-response;
+  verify-preimage: func(request: verify-preimage-request) -> verify-preimage-response;
+  random-secret-and-hash: func(request: random-secret-and-hash-request) -> random-secret-and-hash-response;
+}
+
+world bananabreadwasm {
+  import host;
+  import utils-currencies;
+  import utils-server;
+  import utils-lightning;
+
+  export get-bananabreadwasm-settings: func(request-json: string) -> string;
+  export save-bananabreadwasm-settings: func(request-json: string) -> string;
+  export list-bananabreadwasm-wallets: func(request-json: string) -> string;
+  export create-bananabreadwasm-game: func(request-json: string) -> string;
+  export list-bananabreadwasm-games: func(request-json: string) -> string;
+  export delete-bananabreadwasm-game: func(request-json: string) -> string;
+  export get-public-bananabreadwasm-game: func(request-json: string) -> string;
+  export join-bananabreadwasm-game: func(request-json: string) -> string;
+  export admit-bananabreadwasm-player: func(request-json: string) -> string;
+  export settle-bananabreadwasm-kill: func(request-json: string) -> string;
+  export expire-bananabreadwasm-disconnect: func(request-json: string) -> string;
+  export settle-bananabreadwasm-payout: func(request-json: string) -> string;
+  export record-bananabreadwasm-payment: func(event-json: string) -> string;
+}

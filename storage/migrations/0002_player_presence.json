@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "description": "Track active BananaBread player presence so abandoned paid slots can expire.",
+  "operations": [
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "last_seen_at",
+      "type": "datetime",
+      "nullable": true
+    }
+  ]
+}

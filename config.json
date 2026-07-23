@@ -1,0 +1,236 @@
+{
+  "id": "bananabreadwasm",
+  "name": "BananaBread Arena",
+  "short_description": "Paid, server-authoritative multiplayer Sour arenas with Lightning rewards for kills.",
+  "version": "0.2.0",
+  "min_lnbits_version": "1.5.6",
+  "tile": "/bananabreadwasm/static/assets/icon.png",
+  "tags": ["gaming", "fps", "wasm", "lightning", "multiplayer"],
+  "extension_type": "wasm",
+  "ui": {
+    "external_navigation": true
+  },
+  "wasm": {
+    "module": "wasm/module.wasm",
+    "world": "bananabreadwasm",
+    "exports": [
+      {
+        "name": "get-bananabreadwasm-settings",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "save-bananabreadwasm-settings",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "list-bananabreadwasm-wallets",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "create-bananabreadwasm-game",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "list-bananabreadwasm-games",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "delete-bananabreadwasm-game",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "get-public-bananabreadwasm-game",
+        "visibility": "public"
+      },
+      {
+        "name": "join-bananabreadwasm-game",
+        "visibility": "public"
+      },
+      {
+        "name": "admit-bananabreadwasm-player",
+        "visibility": "public"
+      },
+      {
+        "name": "settle-bananabreadwasm-kill",
+        "visibility": "public"
+      },
+      {
+        "name": "expire-bananabreadwasm-disconnect",
+        "visibility": "public"
+      },
+      {
+        "name": "settle-bananabreadwasm-payout",
+        "visibility": "authenticated"
+      },
+      {
+        "name": "record-bananabreadwasm-payment",
+        "visibility": "event"
+      }
+    ]
+  },
+  "events": {
+    "onInvoicePaid": "record-bananabreadwasm-payment"
+  },
+  "ui_routes": [
+    {
+      "path": "/bananabreadwasm",
+      "entrypoint": "ui/admin.html",
+      "auth": "user"
+    },
+    {
+      "path": "/bananabreadwasm/games/{game_id}",
+      "entrypoint": "ui/public.html",
+      "auth": "public",
+      "path_params": {
+        "game_id": "gameId"
+      }
+    }
+  ],
+  "api_routes": [
+    {
+      "method": "GET",
+      "path": "/settings",
+      "export": "get-bananabreadwasm-settings",
+      "auth": "user"
+    },
+    {
+      "method": "PUT",
+      "path": "/settings",
+      "export": "save-bananabreadwasm-settings",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/wallets",
+      "export": "list-bananabreadwasm-wallets",
+      "auth": "user"
+    },
+    {
+      "method": "POST",
+      "path": "/games",
+      "export": "create-bananabreadwasm-game",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/games",
+      "export": "list-bananabreadwasm-games",
+      "auth": "user"
+    },
+    {
+      "method": "DELETE",
+      "path": "/games/{game_id}",
+      "export": "delete-bananabreadwasm-game",
+      "auth": "user",
+      "path_params": {
+        "game_id": "gameId"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/games/{game_id}",
+      "export": "get-public-bananabreadwasm-game",
+      "auth": "public",
+      "path_params": {
+        "game_id": "gameId"
+      },
+      "ownerContext": {
+        "table": "bananabreadwasm_games",
+        "idParam": "gameId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/games/{game_id}/join",
+      "export": "join-bananabreadwasm-game",
+      "auth": "public",
+      "path_params": {
+        "game_id": "gameId"
+      },
+      "ownerContext": {
+        "table": "bananabreadwasm_games",
+        "idParam": "gameId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/games/{game_id}/server/admit",
+      "export": "admit-bananabreadwasm-player",
+      "auth": "public",
+      "path_params": {
+        "game_id": "gameId"
+      },
+      "ownerContext": {
+        "table": "bananabreadwasm_games",
+        "idParam": "gameId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/games/{game_id}/server/kill",
+      "export": "settle-bananabreadwasm-kill",
+      "auth": "public",
+      "path_params": {
+        "game_id": "gameId"
+      },
+      "ownerContext": {
+        "table": "bananabreadwasm_games",
+        "idParam": "gameId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/games/{game_id}/server/disconnect",
+      "export": "expire-bananabreadwasm-disconnect",
+      "auth": "public",
+      "path_params": {
+        "game_id": "gameId"
+      },
+      "ownerContext": {
+        "table": "bananabreadwasm_games",
+        "idParam": "gameId"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/games/{game_id}/settle",
+      "export": "settle-bananabreadwasm-payout",
+      "auth": "user",
+      "path_params": {
+        "game_id": "gameId"
+      }
+    }
+  ],
+  "permissions": [
+    {
+      "id": "ext.storage.read",
+      "description": "Read BananaBread settings, arenas, players, and settlement records."
+    },
+    {
+      "id": "ext.storage.write",
+      "description": "Write BananaBread settings, arenas, players, and settlement state."
+    },
+    {
+      "id": "wallet.list",
+      "description": "Show the arena owner's LNbits wallets."
+    },
+    {
+      "id": "wallet.create_invoice_public",
+      "description": "Create paid public admission invoices for configured arenas.",
+      "policies": [
+        {
+          "table": "bananabreadwasm_games",
+          "wallet_field": "wallet_id"
+        }
+      ]
+    },
+    {
+      "id": "wallet.pay_invoice",
+      "description": "Pay authoritative kill rewards and disconnect refunds."
+    },
+    {
+      "id": "wallet.pay_invoice_background",
+      "description": "Pay server-confirmed rewards and refunds from the arena owner's approved wallet."
+    }
+  ]
+}

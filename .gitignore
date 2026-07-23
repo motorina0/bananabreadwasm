@@ -1,0 +1,4 @@
+dev/dist/
+gateway/bananabread-gateway
+gateway/bananabread-data/
+gateway/.env

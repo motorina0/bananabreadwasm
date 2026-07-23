@@ -1,0 +1,90 @@
+{
+  "version": 3,
+  "description": "Add Sour gateway credentials and idempotent kill/refund settlement state.",
+  "operations": [
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_settings",
+      "field": "gateway_url",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_settings",
+      "field": "server_secret",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_games",
+      "field": "gateway_url",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_games",
+      "field": "server_secret",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "kill_event_id",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "payout_attempts",
+      "type": "integer",
+      "default": 0
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "disconnect_event_id",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "refund_amount",
+      "type": "integer",
+      "default": 0
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "refund_status",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "refund_attempts",
+      "type": "integer",
+      "default": 0
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "connected_at",
+      "type": "datetime",
+      "nullable": true
+    },
+    {
+      "op": "add_field",
+      "table": "bananabreadwasm_players",
+      "field": "disconnected_at",
+      "type": "datetime",
+      "nullable": true
+    }
+  ]
+}
