@@ -1,10 +1,9 @@
 {
-  "id": "bananabreadwasm",
-  "name": "BananaBread Arena",
-  "short_description": "Paid, server-authoritative multiplayer Sour arenas with Lightning rewards for kills.",
-  "version": "0.2.0",
-  "min_lnbits_version": "1.5.6",
-  "extension_type": "wasm",
-  "tile": "/ext-assets/bananabreadwasm/assets/icon.png",
-  "tags": ["gaming", "fps", "wasm", "lightning", "multiplayer"]
+  "repos": [
+    {
+      "id": "bananabreadwasm",
+      "organisation": "motorina0",
+      "repository": "bananabreadwasm"
+    }
+  ]
 }
