@@ -95,7 +95,7 @@ Open the extension admin page:
 2. Set the public HTTPS gateway URL.
 3. Generate a shared secret and give the exact same secret to the gateway.
 4. Keep the default 10% arena fee or set the desired fee.
-5. Enable paid arenas and save.
+5. Enable arenas and save.
 6. Authorize external background payments up to 100 sats.
 7. Create an arena and share its public link.
 

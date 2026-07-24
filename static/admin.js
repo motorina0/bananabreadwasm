@@ -4,6 +4,40 @@ const client = window.createLNbitsExtensionClient({
 const MIN_JOIN_SATS = 50
 const MAX_JOIN_SATS = 100
 
+function normalizedGatewayUrl(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\/+$/, '')
+}
+
+function gatewayUrlError(value) {
+  const text = normalizedGatewayUrl(value)
+  if (!text) return 'Enter the public Sour gateway URL.'
+  const match = text.match(/^(https?):\/\/([^/?#]+)(\/[^?#]*)?$/i)
+  if (!match || match[2].includes('@')) return 'Enter a valid gateway URL.'
+  const hostname = match[2]
+    .replace(/:\d+$/, '')
+    .replace(/^\[|\]$/g, '')
+    .toLowerCase()
+  const local =
+    ['localhost', '127.0.0.1', '::1'].includes(hostname) &&
+    match[1].toLowerCase() === 'http'
+  if (match[1].toLowerCase() !== 'https' && !local) {
+    return 'Use HTTPS, or HTTP on localhost.'
+  }
+  return ''
+}
+
+function settingsFingerprint(settings, walletId) {
+  return JSON.stringify({
+    enabled: settings.enabled === true,
+    walletId: String(walletId || ''),
+    haircut: Number(settings.haircut ?? 10),
+    gatewayUrl: normalizedGatewayUrl(settings.gatewayUrl),
+    serverSecret: String(settings.serverSecret || '').trim()
+  })
+}
+
 const app = Vue.createApp({
   data() {
     return {
@@ -21,6 +55,7 @@ const app = Vue.createApp({
         gatewayUrl: '',
         serverSecret: ''
       },
+      savedSettings: null,
       gameForm: {name: 'BananaBread public arena', joinAmount: 100},
       wallets: [],
       games: [],
@@ -94,20 +129,42 @@ const app = Vue.createApp({
     effectiveWalletId() {
       return this.settings.walletId || this.wallets[0]?.id || ''
     },
+    walletError() {
+      return this.settings.enabled && !this.effectiveWalletId
+        ? 'Select an LNbits wallet.'
+        : ''
+    },
+    gatewayError() {
+      return this.settings.enabled
+        ? gatewayUrlError(this.settings.gatewayUrl)
+        : ''
+    },
+    serverSecretError() {
+      return this.settings.enabled &&
+        String(this.settings.serverSecret || '').trim().length < 32
+        ? 'Generate or enter a secret of at least 32 characters.'
+        : ''
+    },
+    settingsValidationError() {
+      return this.walletError || this.gatewayError || this.serverSecretError
+    },
     canSave() {
+      return !this.settingsValidationError
+    },
+    settingsAreSaved() {
       return (
-        !this.settings.enabled ||
-        (!!this.effectiveWalletId &&
-          (/^https:\/\//i.test(this.settings.gatewayUrl || '') ||
-            /^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i.test(
-              this.settings.gatewayUrl || ''
-            )) &&
-          String(this.settings.serverSecret || '').length >= 32)
+        this.savedSettings !== null &&
+        settingsFingerprint(this.settings, this.effectiveWalletId) ===
+          settingsFingerprint(
+            this.savedSettings,
+            this.savedSettings.walletId
+          )
       )
     },
     canCreate() {
       return (
-        this.settings.enabled &&
+        this.settingsAreSaved &&
+        this.savedSettings.enabled &&
         this.effectiveWalletId &&
         this.gameForm.name &&
         Number.isSafeInteger(Number(this.gameForm.joinAmount)) &&
@@ -116,17 +173,18 @@ const app = Vue.createApp({
       )
     },
     canAuthorizePayouts() {
-      return this.settings.enabled && this.effectiveWalletId
+      return (
+        this.settingsAreSaved &&
+        this.savedSettings.enabled &&
+        this.effectiveWalletId
+      )
     }
   },
   async mounted() {
     this.loading = true
     try {
-      await Promise.all([
-        this.fetchWallets(),
-        this.fetchSettings(),
-        this.fetchGames()
-      ])
+      await this.fetchWallets()
+      await Promise.all([this.fetchSettings(), this.fetchGames()])
     } finally {
       this.loading = false
     }
@@ -147,12 +205,16 @@ const app = Vue.createApp({
         }
         if (!this.settings.walletId && this.wallets.length)
           this.settings.walletId = this.wallets[0].id
+        this.savedSettings = {...this.settings}
       } catch (error) {
         this.showError(error)
       }
     },
     async saveSettings() {
-      if (!this.canSave) return
+      if (!this.canSave) {
+        this.notify(this.settingsValidationError, 'negative')
+        return
+      }
       this.saving = true
       try {
         this.settings = (
@@ -165,6 +227,7 @@ const app = Vue.createApp({
             serverSecret: this.settings.serverSecret
           })
         ).settings
+        this.savedSettings = {...this.settings}
         this.notify('BananaBread settings saved.', 'positive')
       } catch (error) {
         this.showError(error)
@@ -364,7 +427,7 @@ const app = Vue.createApp({
               h(q('QToggle'), {
                 modelValue: this.settings.enabled,
                 'onUpdate:modelValue': v => (this.settings.enabled = v),
-                label: 'Enable paid arenas',
+                label: 'Enable arenas',
                 color: 'primary'
               }),
               h(q('QSelect'), {
@@ -378,7 +441,9 @@ const app = Vue.createApp({
                 dark: true,
                 optionsDark: true,
                 emitValue: true,
-                mapOptions: true
+                mapOptions: true,
+                error: Boolean(this.walletError),
+                errorMessage: this.walletError
               }),
               h(q('QInput'), {
                 class: 'q-mt-sm',
@@ -403,7 +468,9 @@ const app = Vue.createApp({
                 filled: true,
                 dense: true,
                 dark: true,
-                placeholder: 'https://arena.example.com'
+                placeholder: 'https://arena.example.com',
+                error: Boolean(this.gatewayError),
+                errorMessage: this.gatewayError
               }),
               h(q('QInput'), {
                 class: 'q-mt-sm',
@@ -414,7 +481,9 @@ const app = Vue.createApp({
                 hint: 'Use the same value in BANANABREAD_SERVER_SECRET.',
                 filled: true,
                 dense: true,
-                dark: true
+                dark: true,
+                error: Boolean(this.serverSecretError),
+                errorMessage: this.serverSecretError
               }),
               h(
                 q('QBtn'),
@@ -432,7 +501,6 @@ const app = Vue.createApp({
                   class: 'q-mt-md',
                   color: 'primary',
                   loading: this.saving,
-                  disable: !this.canSave,
                   onClick: this.saveSettings
                 },
                 () => 'Save Settings'

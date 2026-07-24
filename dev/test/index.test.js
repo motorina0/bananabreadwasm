@@ -74,6 +74,7 @@ function createHarness(payLnurl) {
       saveSettings: saveBananabreadwasmSettings,
       createGame: createBananabreadwasmGame,
       getPublicGame: getPublicBananabreadwasmGame,
+      joinGame: joinBananabreadwasmGame,
       settleKill: settleBananabreadwasmKill,
       expireDisconnect: expireBananabreadwasmDisconnect,
       retrySettlement: settleBananabreadwasmPayout
@@ -134,6 +135,24 @@ function addPlayer(harness, game, id, name, token) {
 }
 
 {
+  const harness = createHarness(() => ({ok: true, success: true}))
+  configure(harness)
+  const game = harness.invoke('createGame', {joinAmount: 100}).game
+  assert.equal(
+    harness.invoke('getPublicGame', {gameId: game.id}).admissionsEnabled,
+    true
+  )
+  harness.invoke('saveSettings', {enabled: false})
+  const paused = harness.invoke('getPublicGame', {gameId: game.id})
+  assert.equal(paused.admissionsEnabled, false)
+  assert.equal(paused.canJoin, false)
+  assert.throws(
+    () => harness.invoke('joinGame', {gameId: game.id}),
+    /admissions are disabled/
+  )
+}
+
+{
   const paymentRequests = []
   const harness = createHarness(request => {
     paymentRequests.push(request)
@@ -143,6 +162,7 @@ function addPlayer(harness, game, id, name, token) {
   const game = harness.invoke('createGame', {joinAmount: 100}).game
   addPlayer(harness, game, 'killer', 'KILLER', 'killer-ticket')
   addPlayer(harness, game, 'victim', 'VICTIM', 'victim-ticket')
+  harness.invoke('saveSettings', {enabled: false})
 
   const first = harness.invoke('settleKill', {
     gameId: game.id,

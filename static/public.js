@@ -9,6 +9,8 @@
     player: null,
     playerToken: '',
     paymentRequest: '',
+    admissionsEnabled: false,
+    canJoin: false,
     paymentUnsubscribe: null,
     pollTimer: null
   }
@@ -84,9 +86,9 @@
       subscribeToPayment(response.paymentHash)
       await refresh()
     } catch (error) {
+      await refresh().catch(() => {})
       showError(error)
-      elements.joinButton.disabled = false
-      elements.joinButton.textContent = 'CREATE JOIN INVOICE'
+      renderJoinAvailability()
     }
   }
 
@@ -109,6 +111,8 @@
     const response = await client.getPublicGame(state.gameId, state.playerToken)
     state.game = response.game || null
     state.player = response.player || null
+    state.admissionsEnabled = response.admissionsEnabled === true
+    state.canJoin = response.canJoin === true
     render(response)
   }
 
@@ -160,10 +164,17 @@
       showOnly(elements.invoicePanel)
       return
     }
-    elements.joinButton.disabled = response.canJoin !== true
-    elements.joinButton.textContent =
-      response.canJoin === true ? 'CREATE JOIN INVOICE' : 'ARENA FULL'
+    renderJoinAvailability()
     showOnly(elements.joinPanel)
+  }
+
+  function renderJoinAvailability() {
+    elements.joinButton.disabled = !state.canJoin
+    elements.joinButton.textContent = state.canJoin
+      ? 'CREATE JOIN INVOICE'
+      : state.admissionsEnabled
+        ? 'ARENA FULL'
+        : 'ADMISSIONS PAUSED'
   }
 
   function renderPlayers(players) {
@@ -227,8 +238,7 @@
     state.player = null
     state.paymentRequest = ''
     client.setSessionValue(sessionKey(), '').catch(() => {})
-    elements.joinButton.disabled = false
-    elements.joinButton.textContent = 'CREATE JOIN INVOICE'
+    renderJoinAvailability()
     showOnly(elements.joinPanel)
   }
 

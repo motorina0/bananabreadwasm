@@ -5,6 +5,6 @@
   "scripts": {
     "build": "node scripts/bundle.mjs && npx --yes @bytecodealliance/jco@1.25.2 componentize dist/index.bundle.js --disable all --wit ../wasm/lnbits-extension.wit --world-name bananabreadwasm -o ../wasm/module.wasm",
     "check": "\"$npm_node_execpath\" --check src/index.js && \"$npm_node_execpath\" --check ../static/admin.js && \"$npm_node_execpath\" --check ../static/public.js && \"$npm_node_execpath\" --check ../static/lnbits-extension-sdk.js",
-    "test": "\"$npm_node_execpath\" test/index.test.js && \"$npm_node_execpath\" test/public.test.js"
+    "test": "\"$npm_node_execpath\" test/index.test.js && \"$npm_node_execpath\" test/admin.test.js && \"$npm_node_execpath\" test/public.test.js"
   }
 }

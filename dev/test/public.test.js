@@ -18,5 +18,6 @@ assert.doesNotMatch(publicSource, /declareWinner|settleKill|\/server\/kill/)
 assert.doesNotMatch(publicHtml, /bb\.wasm|q1k3|packed\.js/)
 assert.match(publicHtml, /target="_top"/)
 assert.match(publicHtml, /The Sour server—not a browser—confirms every kill/)
+assert.match(publicSource, /ADMISSIONS PAUSED/)
 
 console.log('BananaBread paid lobby browser-boundary tests passed')

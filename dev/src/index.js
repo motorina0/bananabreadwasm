@@ -143,6 +143,7 @@ export function getPublicBananabreadwasmGame(requestJson) {
     const request = parseJsonObject(requestJson)
     const gameId = requiredText(request.gameId, 'gameId', 128)
     const game = withFreshPlayerCount(getGame(gameId))
+    const admissionsEnabled = getSettings().enabled === true
     const token = cleanText(request.playerToken ?? request.player_token, 128)
     const player = token ? playerForToken(game.id, token) : null
     return {
@@ -152,8 +153,10 @@ export function getPublicBananabreadwasmGame(requestJson) {
         .map(item => publicPlayer(item, false)),
       player: player ? publicPlayer(player, true, game) : null,
       canJoin:
+        admissionsEnabled &&
         game.status === 'active' &&
         alivePlayersForGame(game.id).length < MAX_PLAYERS,
+      admissionsEnabled,
       minimumJoinSats: MIN_JOIN_SATS,
       maximumJoinSats: MAX_JOIN_SATS,
       disconnectGraceSeconds: DISCONNECT_GRACE_SECONDS,
@@ -166,6 +169,9 @@ export function joinBananabreadwasmGame(requestJson) {
   return runJson(() => {
     const request = parseJsonObject(requestJson)
     const game = getGame(requiredText(request.gameId, 'gameId', 128))
+    if (!getSettings().enabled) {
+      throw new Error('Arena admissions are disabled.')
+    }
     if (game.status !== 'active') throw new Error('This arena is not active.')
     if (alivePlayersForGame(game.id).length >= MAX_PLAYERS) {
       throw new Error('This arena is full.')
